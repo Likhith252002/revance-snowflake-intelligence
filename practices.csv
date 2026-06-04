@@ -1,0 +1,201 @@
+PRACTICE_ID,PRACTICE_NAME,TERRITORY,PRACTICE_TYPE,MONTHS_ACTIVE,CHURNED
+P0001,Practice_1,Northeast,Dermatology,20,1
+P0002,Practice_2,Southeast,Dermatology,8,0
+P0003,Practice_3,Northeast,Dermatology,8,1
+P0004,Practice_4,Southwest,Primary Care,4,0
+P0005,Practice_5,Southwest,OB/GYN,17,0
+P0006,Practice_6,Midwest,Dermatology,13,0
+P0007,Practice_7,Midwest,Med Spa,12,1
+P0008,Practice_8,Midwest,Dermatology,8,0
+P0009,Practice_9,Midwest,Med Spa,19,0
+P0010,Practice_10,West,Primary Care,10,0
+P0011,Practice_11,West,Dermatology,21,0
+P0012,Practice_12,Southwest,Med Spa,15,0
+P0013,Practice_13,Northeast,Plastic Surgery,21,0
+P0014,Practice_14,Southeast,Dermatology,27,0
+P0015,Practice_15,Midwest,Plastic Surgery,26,0
+P0016,Practice_16,Midwest,Dermatology,13,0
+P0017,Practice_17,Southeast,Plastic Surgery,32,0
+P0018,Practice_18,Southwest,Plastic Surgery,23,0
+P0019,Practice_19,Northeast,Plastic Surgery,5,0
+P0020,Practice_20,West,Med Spa,7,1
+P0021,Practice_21,Southwest,Med Spa,16,0
+P0022,Practice_22,West,OB/GYN,12,0
+P0023,Practice_23,Southeast,Primary Care,19,0
+P0024,Practice_24,West,Primary Care,28,0
+P0025,Practice_25,Southeast,Primary Care,34,1
+P0026,Practice_26,Northeast,Dermatology,12,0
+P0027,Practice_27,West,Primary Care,7,0
+P0028,Practice_28,Southwest,OB/GYN,36,0
+P0029,Practice_29,Southwest,Dermatology,10,0
+P0030,Practice_30,Southwest,Med Spa,24,1
+P0031,Practice_31,West,Plastic Surgery,32,1
+P0032,Practice_32,Midwest,Primary Care,14,0
+P0033,Practice_33,Northeast,Med Spa,35,0
+P0034,Practice_34,Southeast,Med Spa,13,0
+P0035,Practice_35,Southwest,Dermatology,23,0
+P0036,Practice_36,Northeast,Med Spa,22,1
+P0037,Practice_37,Southeast,Primary Care,8,1
+P0038,Practice_38,West,Dermatology,11,1
+P0039,Practice_39,West,Primary Care,13,0
+P0040,Practice_40,Southwest,OB/GYN,16,0
+P0041,Practice_41,Southeast,Med Spa,28,0
+P0042,Practice_42,Midwest,OB/GYN,36,0
+P0043,Practice_43,Southeast,Plastic Surgery,7,0
+P0044,Practice_44,Southwest,Primary Care,17,0
+P0045,Practice_45,Northeast,Dermatology,6,1
+P0046,Practice_46,Northeast,Med Spa,7,0
+P0047,Practice_47,Midwest,OB/GYN,16,0
+P0048,Practice_48,Southwest,Primary Care,33,1
+P0049,Practice_49,West,OB/GYN,15,1
+P0050,Practice_50,West,Med Spa,30,0
+P0051,Practice_51,Northeast,Dermatology,6,0
+P0052,Practice_52,Midwest,Dermatology,18,1
+P0053,Practice_53,Southwest,OB/GYN,11,0
+P0054,Practice_54,Midwest,OB/GYN,18,0
+P0055,Practice_55,Northeast,OB/GYN,9,1
+P0056,Practice_56,Southwest,Dermatology,8,0
+P0057,Practice_57,Southeast,Plastic Surgery,29,0
+P0058,Practice_58,Southeast,OB/GYN,6,1
+P0059,Practice_59,Northeast,OB/GYN,19,0
+P0060,Practice_60,West,Med Spa,30,0
+P0061,Practice_61,Southwest,OB/GYN,12,1
+P0062,Practice_62,Southeast,Dermatology,6,0
+P0063,Practice_63,Northeast,Dermatology,33,0
+P0064,Practice_64,Southwest,Plastic Surgery,6,0
+P0065,Practice_65,Northeast,Plastic Surgery,7,0
+P0066,Practice_66,Southeast,OB/GYN,10,0
+P0067,Practice_67,Southwest,Plastic Surgery,5,0
+P0068,Practice_68,West,Primary Care,36,0
+P0069,Practice_69,Midwest,Plastic Surgery,23,1
+P0070,Practice_70,West,Plastic Surgery,22,0
+P0071,Practice_71,Northeast,Dermatology,32,0
+P0072,Practice_72,Southwest,Dermatology,7,0
+P0073,Practice_73,Southwest,Med Spa,11,0
+P0074,Practice_74,Northeast,Plastic Surgery,26,0
+P0075,Practice_75,West,Primary Care,22,0
+P0076,Practice_76,Southwest,Dermatology,22,0
+P0077,Practice_77,Northeast,Plastic Surgery,19,1
+P0078,Practice_78,Northeast,Primary Care,12,0
+P0079,Practice_79,Southwest,Plastic Surgery,24,1
+P0080,Practice_80,Midwest,Primary Care,34,0
+P0081,Practice_81,Northeast,Dermatology,30,0
+P0082,Practice_82,Northeast,Dermatology,24,0
+P0083,Practice_83,Midwest,Plastic Surgery,31,0
+P0084,Practice_84,West,Primary Care,3,1
+P0085,Practice_85,Southeast,Primary Care,5,0
+P0086,Practice_86,Southwest,Primary Care,12,0
+P0087,Practice_87,Northeast,Med Spa,26,0
+P0088,Practice_88,Northeast,Med Spa,16,0
+P0089,Practice_89,Northeast,Med Spa,29,0
+P0090,Practice_90,Southeast,Plastic Surgery,13,0
+P0091,Practice_91,Southeast,OB/GYN,4,1
+P0092,Practice_92,Midwest,OB/GYN,18,0
+P0093,Practice_93,Northeast,OB/GYN,5,0
+P0094,Practice_94,Southeast,Plastic Surgery,32,0
+P0095,Practice_95,Southeast,Plastic Surgery,4,0
+P0096,Practice_96,West,Med Spa,20,0
+P0097,Practice_97,Midwest,Med Spa,35,0
+P0098,Practice_98,Southwest,Med Spa,4,1
+P0099,Practice_99,Midwest,Plastic Surgery,19,1
+P0100,Practice_100,Southwest,OB/GYN,25,0
+P0101,Practice_101,Midwest,OB/GYN,35,1
+P0102,Practice_102,Southwest,Plastic Surgery,19,1
+P0103,Practice_103,West,Dermatology,36,0
+P0104,Practice_104,Southwest,Plastic Surgery,26,0
+P0105,Practice_105,Midwest,Primary Care,23,0
+P0106,Practice_106,Northeast,Med Spa,35,0
+P0107,Practice_107,West,Med Spa,28,0
+P0108,Practice_108,Southwest,Plastic Surgery,15,0
+P0109,Practice_109,West,Plastic Surgery,22,0
+P0110,Practice_110,Northeast,Med Spa,21,1
+P0111,Practice_111,Southwest,Primary Care,23,0
+P0112,Practice_112,West,Plastic Surgery,35,0
+P0113,Practice_113,Southeast,Dermatology,21,0
+P0114,Practice_114,Southwest,Med Spa,8,0
+P0115,Practice_115,Southeast,Med Spa,17,0
+P0116,Practice_116,Southeast,Dermatology,5,1
+P0117,Practice_117,West,Primary Care,7,0
+P0118,Practice_118,Southwest,Plastic Surgery,27,0
+P0119,Practice_119,Southeast,Plastic Surgery,3,0
+P0120,Practice_120,Northeast,OB/GYN,17,1
+P0121,Practice_121,Southwest,OB/GYN,6,0
+P0122,Practice_122,Northeast,OB/GYN,11,0
+P0123,Practice_123,Southwest,Primary Care,23,0
+P0124,Practice_124,West,Primary Care,35,0
+P0125,Practice_125,Southwest,OB/GYN,13,0
+P0126,Practice_126,West,OB/GYN,19,0
+P0127,Practice_127,Midwest,Primary Care,34,0
+P0128,Practice_128,Midwest,OB/GYN,7,0
+P0129,Practice_129,Southeast,Med Spa,24,0
+P0130,Practice_130,Southwest,Dermatology,11,1
+P0131,Practice_131,West,Plastic Surgery,16,1
+P0132,Practice_132,West,Med Spa,32,0
+P0133,Practice_133,Southeast,OB/GYN,27,0
+P0134,Practice_134,Southwest,Dermatology,27,0
+P0135,Practice_135,Midwest,Med Spa,27,0
+P0136,Practice_136,West,Primary Care,17,0
+P0137,Practice_137,Midwest,OB/GYN,34,1
+P0138,Practice_138,Midwest,OB/GYN,13,0
+P0139,Practice_139,Southeast,Primary Care,4,0
+P0140,Practice_140,Southwest,Primary Care,4,1
+P0141,Practice_141,West,Plastic Surgery,32,1
+P0142,Practice_142,Midwest,OB/GYN,23,1
+P0143,Practice_143,Midwest,Med Spa,27,0
+P0144,Practice_144,West,Med Spa,8,0
+P0145,Practice_145,Southwest,Dermatology,25,1
+P0146,Practice_146,Northeast,Dermatology,4,0
+P0147,Practice_147,Southeast,Dermatology,12,1
+P0148,Practice_148,West,Dermatology,16,0
+P0149,Practice_149,Midwest,Med Spa,13,0
+P0150,Practice_150,Northeast,Plastic Surgery,22,1
+P0151,Practice_151,Northeast,Med Spa,27,0
+P0152,Practice_152,Southeast,Dermatology,18,1
+P0153,Practice_153,Midwest,Primary Care,10,0
+P0154,Practice_154,Southwest,Dermatology,25,0
+P0155,Practice_155,Midwest,Dermatology,35,0
+P0156,Practice_156,Northeast,OB/GYN,34,1
+P0157,Practice_157,Midwest,OB/GYN,12,0
+P0158,Practice_158,Southwest,Med Spa,33,0
+P0159,Practice_159,Southwest,Med Spa,23,0
+P0160,Practice_160,Northeast,Med Spa,31,1
+P0161,Practice_161,West,Primary Care,27,0
+P0162,Practice_162,West,Med Spa,14,0
+P0163,Practice_163,Midwest,Med Spa,24,0
+P0164,Practice_164,Southwest,Med Spa,3,0
+P0165,Practice_165,Southeast,Dermatology,18,0
+P0166,Practice_166,West,Primary Care,18,0
+P0167,Practice_167,West,OB/GYN,4,1
+P0168,Practice_168,Southeast,OB/GYN,18,0
+P0169,Practice_169,Southwest,Med Spa,33,0
+P0170,Practice_170,Midwest,OB/GYN,24,0
+P0171,Practice_171,West,Med Spa,22,0
+P0172,Practice_172,Northeast,Plastic Surgery,23,1
+P0173,Practice_173,Southwest,Plastic Surgery,15,1
+P0174,Practice_174,West,Med Spa,36,0
+P0175,Practice_175,Northeast,Plastic Surgery,21,1
+P0176,Practice_176,Southeast,Med Spa,3,0
+P0177,Practice_177,Southeast,Med Spa,5,0
+P0178,Practice_178,Southwest,Med Spa,11,0
+P0179,Practice_179,West,Dermatology,3,0
+P0180,Practice_180,West,OB/GYN,31,0
+P0181,Practice_181,Northeast,Med Spa,33,1
+P0182,Practice_182,Northeast,OB/GYN,34,1
+P0183,Practice_183,Northeast,Plastic Surgery,12,0
+P0184,Practice_184,Midwest,Dermatology,18,1
+P0185,Practice_185,West,Primary Care,17,0
+P0186,Practice_186,West,OB/GYN,31,0
+P0187,Practice_187,Southwest,OB/GYN,22,0
+P0188,Practice_188,Northeast,Primary Care,9,0
+P0189,Practice_189,Southeast,Plastic Surgery,19,0
+P0190,Practice_190,Southeast,Plastic Surgery,14,0
+P0191,Practice_191,Southeast,Dermatology,29,0
+P0192,Practice_192,Southwest,OB/GYN,21,1
+P0193,Practice_193,Midwest,Med Spa,32,1
+P0194,Practice_194,Southeast,Med Spa,15,0
+P0195,Practice_195,Southwest,Plastic Surgery,12,0
+P0196,Practice_196,Southeast,Dermatology,6,1
+P0197,Practice_197,Midwest,Primary Care,21,0
+P0198,Practice_198,West,Med Spa,28,0
+P0199,Practice_199,Southwest,Primary Care,34,0
+P0200,Practice_200,Southwest,Dermatology,30,0

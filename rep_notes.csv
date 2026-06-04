@@ -1,0 +1,201 @@
+NOTE_ID,PRACTICE_ID,TERRITORY,NOTE_DATE,REP_NOTES
+NP0001,P0001,Northeast,2026-05-23,Requested more training on injection techniques
+NP0002,P0002,Southeast,2026-05-28,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0003,P0003,Northeast,2026-05-06,"No orders in last 60 days, difficult to reach"
+NP0004,P0004,Southwest,2026-05-20,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0005,P0005,Southwest,2026-05-08,"Concerned about pricing, may switch to competitor Botox"
+NP0006,P0006,Midwest,2026-05-22,"Expanding clinic, interested in bulk orders"
+NP0007,P0007,Midwest,2026-05-20,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0008,P0008,Midwest,2026-05-15,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0009,P0009,Midwest,2026-06-02,"Strong advocate, referring other practices to us"
+NP0010,P0010,West,2026-05-10,"No orders in last 60 days, difficult to reach"
+NP0011,P0011,West,2026-05-05,"No orders in last 60 days, difficult to reach"
+NP0012,P0012,Southwest,2026-05-23,"No orders in last 60 days, difficult to reach"
+NP0013,P0013,Northeast,2026-05-28,"Concerned about pricing, may switch to competitor Botox"
+NP0014,P0014,Southeast,2026-06-03,"Strong advocate, referring other practices to us"
+NP0015,P0015,Midwest,2026-06-03,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0016,P0016,Midwest,2026-05-24,"No orders in last 60 days, difficult to reach"
+NP0017,P0017,Southeast,2026-05-13,"Concerned about pricing, may switch to competitor Botox"
+NP0018,P0018,Southwest,2026-05-27,"Concerned about pricing, may switch to competitor Botox"
+NP0019,P0019,Northeast,2026-05-09,Requested more training on injection techniques
+NP0020,P0020,West,2026-05-11,Requested more training on injection techniques
+NP0021,P0021,Southwest,2026-06-02,"Strong advocate, referring other practices to us"
+NP0022,P0022,West,2026-05-18,"Concerned about pricing, may switch to competitor Botox"
+NP0023,P0023,Southeast,2026-05-08,Complained about delivery delays last month
+NP0024,P0024,West,2026-05-24,"No orders in last 60 days, difficult to reach"
+NP0025,P0025,Southeast,2026-05-15,"No orders in last 60 days, difficult to reach"
+NP0026,P0026,Northeast,2026-05-05,"Strong advocate, referring other practices to us"
+NP0027,P0027,West,2026-05-21,"Concerned about pricing, may switch to competitor Botox"
+NP0028,P0028,Southwest,2026-05-27,"No orders in last 60 days, difficult to reach"
+NP0029,P0029,Southwest,2026-05-31,Complained about delivery delays last month
+NP0030,P0030,Southwest,2026-05-24,Requested more training on injection techniques
+NP0031,P0031,West,2026-06-03,"Strong advocate, referring other practices to us"
+NP0032,P0032,Midwest,2026-05-14,Complained about delivery delays last month
+NP0033,P0033,Northeast,2026-06-03,"Strong advocate, referring other practices to us"
+NP0034,P0034,Southeast,2026-05-28,"Budget cuts mentioned, reducing orders significantly"
+NP0035,P0035,Southwest,2026-05-27,"Concerned about pricing, may switch to competitor Botox"
+NP0036,P0036,Northeast,2026-05-13,"Expanding clinic, interested in bulk orders"
+NP0037,P0037,Southeast,2026-05-14,Complained about delivery delays last month
+NP0038,P0038,West,2026-06-02,"Concerned about pricing, may switch to competitor Botox"
+NP0039,P0039,West,2026-05-06,"No orders in last 60 days, difficult to reach"
+NP0040,P0040,Southwest,2026-05-21,"Expanding clinic, interested in bulk orders"
+NP0041,P0041,Southeast,2026-05-10,"Budget cuts mentioned, reducing orders significantly"
+NP0042,P0042,Midwest,2026-05-31,Requested more training on injection techniques
+NP0043,P0043,Southeast,2026-05-26,"Concerned about pricing, may switch to competitor Botox"
+NP0044,P0044,Southwest,2026-05-15,Complained about delivery delays last month
+NP0045,P0045,Northeast,2026-05-14,"Strong advocate, referring other practices to us"
+NP0046,P0046,Northeast,2026-05-13,Requested more training on injection techniques
+NP0047,P0047,Midwest,2026-05-24,Requested more training on injection techniques
+NP0048,P0048,Southwest,2026-05-14,Complained about delivery delays last month
+NP0049,P0049,West,2026-05-07,"Budget cuts mentioned, reducing orders significantly"
+NP0050,P0050,West,2026-06-01,Complained about delivery delays last month
+NP0051,P0051,Northeast,2026-06-03,"Budget cuts mentioned, reducing orders significantly"
+NP0052,P0052,Midwest,2026-05-22,"No orders in last 60 days, difficult to reach"
+NP0053,P0053,Southwest,2026-05-18,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0054,P0054,Midwest,2026-05-27,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0055,P0055,Northeast,2026-05-15,"Concerned about pricing, may switch to competitor Botox"
+NP0056,P0056,Southwest,2026-05-25,"No orders in last 60 days, difficult to reach"
+NP0057,P0057,Southeast,2026-05-11,"Strong advocate, referring other practices to us"
+NP0058,P0058,Southeast,2026-05-10,"No orders in last 60 days, difficult to reach"
+NP0059,P0059,Northeast,2026-05-15,"Concerned about pricing, may switch to competitor Botox"
+NP0060,P0060,West,2026-06-02,Requested more training on injection techniques
+NP0061,P0061,Southwest,2026-05-23,"Budget cuts mentioned, reducing orders significantly"
+NP0062,P0062,Southeast,2026-05-25,"No orders in last 60 days, difficult to reach"
+NP0063,P0063,Northeast,2026-05-30,"Strong advocate, referring other practices to us"
+NP0064,P0064,Southwest,2026-05-28,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0065,P0065,Northeast,2026-05-27,"Budget cuts mentioned, reducing orders significantly"
+NP0066,P0066,Southeast,2026-05-11,Complained about delivery delays last month
+NP0067,P0067,Southwest,2026-05-30,"Expanding clinic, interested in bulk orders"
+NP0068,P0068,West,2026-05-24,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0069,P0069,Midwest,2026-05-18,"Strong advocate, referring other practices to us"
+NP0070,P0070,West,2026-05-14,"Expanding clinic, interested in bulk orders"
+NP0071,P0071,Northeast,2026-05-10,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0072,P0072,Southwest,2026-05-27,Complained about delivery delays last month
+NP0073,P0073,Southwest,2026-05-24,"No orders in last 60 days, difficult to reach"
+NP0074,P0074,Northeast,2026-05-28,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0075,P0075,West,2026-05-05,"No orders in last 60 days, difficult to reach"
+NP0076,P0076,Southwest,2026-05-09,"No orders in last 60 days, difficult to reach"
+NP0077,P0077,Northeast,2026-05-15,"Strong advocate, referring other practices to us"
+NP0078,P0078,Northeast,2026-05-18,Complained about delivery delays last month
+NP0079,P0079,Southwest,2026-05-29,"Budget cuts mentioned, reducing orders significantly"
+NP0080,P0080,Midwest,2026-05-14,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0081,P0081,Northeast,2026-06-01,"Budget cuts mentioned, reducing orders significantly"
+NP0082,P0082,Northeast,2026-06-01,"No orders in last 60 days, difficult to reach"
+NP0083,P0083,Midwest,2026-06-02,Requested more training on injection techniques
+NP0084,P0084,West,2026-05-28,Requested more training on injection techniques
+NP0085,P0085,Southeast,2026-06-01,Requested more training on injection techniques
+NP0086,P0086,Southwest,2026-05-16,"No orders in last 60 days, difficult to reach"
+NP0087,P0087,Northeast,2026-05-27,"Concerned about pricing, may switch to competitor Botox"
+NP0088,P0088,Northeast,2026-05-21,"Budget cuts mentioned, reducing orders significantly"
+NP0089,P0089,Northeast,2026-05-25,Requested more training on injection techniques
+NP0090,P0090,Southeast,2026-05-11,"No orders in last 60 days, difficult to reach"
+NP0091,P0091,Southeast,2026-05-27,"Strong advocate, referring other practices to us"
+NP0092,P0092,Midwest,2026-05-29,"No orders in last 60 days, difficult to reach"
+NP0093,P0093,Northeast,2026-05-25,"Expanding clinic, interested in bulk orders"
+NP0094,P0094,Southeast,2026-05-16,"Budget cuts mentioned, reducing orders significantly"
+NP0095,P0095,Southeast,2026-05-14,"No orders in last 60 days, difficult to reach"
+NP0096,P0096,West,2026-05-26,"Budget cuts mentioned, reducing orders significantly"
+NP0097,P0097,Midwest,2026-06-01,Complained about delivery delays last month
+NP0098,P0098,Southwest,2026-05-22,"Strong advocate, referring other practices to us"
+NP0099,P0099,Midwest,2026-05-29,"Budget cuts mentioned, reducing orders significantly"
+NP0100,P0100,Southwest,2026-05-20,"Strong advocate, referring other practices to us"
+NP0101,P0101,Midwest,2026-05-18,"Strong advocate, referring other practices to us"
+NP0102,P0102,Southwest,2026-05-10,Requested more training on injection techniques
+NP0103,P0103,West,2026-05-08,"Budget cuts mentioned, reducing orders significantly"
+NP0104,P0104,Southwest,2026-06-03,"Strong advocate, referring other practices to us"
+NP0105,P0105,Midwest,2026-05-21,"Concerned about pricing, may switch to competitor Botox"
+NP0106,P0106,Northeast,2026-05-10,"Expanding clinic, interested in bulk orders"
+NP0107,P0107,West,2026-05-15,Requested more training on injection techniques
+NP0108,P0108,Southwest,2026-05-17,Requested more training on injection techniques
+NP0109,P0109,West,2026-05-26,"Strong advocate, referring other practices to us"
+NP0110,P0110,Northeast,2026-05-20,"Expanding clinic, interested in bulk orders"
+NP0111,P0111,Southwest,2026-05-20,"Expanding clinic, interested in bulk orders"
+NP0112,P0112,West,2026-05-22,"Budget cuts mentioned, reducing orders significantly"
+NP0113,P0113,Southeast,2026-06-01,Complained about delivery delays last month
+NP0114,P0114,Southwest,2026-05-30,"Budget cuts mentioned, reducing orders significantly"
+NP0115,P0115,Southeast,2026-05-28,Requested more training on injection techniques
+NP0116,P0116,Southeast,2026-05-05,"No orders in last 60 days, difficult to reach"
+NP0117,P0117,West,2026-06-03,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0118,P0118,Southwest,2026-05-07,Complained about delivery delays last month
+NP0119,P0119,Southeast,2026-05-19,"Strong advocate, referring other practices to us"
+NP0120,P0120,Northeast,2026-05-05,"Strong advocate, referring other practices to us"
+NP0121,P0121,Southwest,2026-05-22,Complained about delivery delays last month
+NP0122,P0122,Northeast,2026-05-22,"Budget cuts mentioned, reducing orders significantly"
+NP0123,P0123,Southwest,2026-05-25,"Concerned about pricing, may switch to competitor Botox"
+NP0124,P0124,West,2026-05-21,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0125,P0125,Southwest,2026-05-05,"Concerned about pricing, may switch to competitor Botox"
+NP0126,P0126,West,2026-05-22,Requested more training on injection techniques
+NP0127,P0127,Midwest,2026-05-28,"Strong advocate, referring other practices to us"
+NP0128,P0128,Midwest,2026-05-26,Complained about delivery delays last month
+NP0129,P0129,Southeast,2026-05-18,"Budget cuts mentioned, reducing orders significantly"
+NP0130,P0130,Southwest,2026-05-14,Complained about delivery delays last month
+NP0131,P0131,West,2026-05-12,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0132,P0132,West,2026-05-14,"Strong advocate, referring other practices to us"
+NP0133,P0133,Southeast,2026-05-05,"Strong advocate, referring other practices to us"
+NP0134,P0134,Southwest,2026-05-11,"No orders in last 60 days, difficult to reach"
+NP0135,P0135,Midwest,2026-05-27,"Budget cuts mentioned, reducing orders significantly"
+NP0136,P0136,West,2026-06-02,Complained about delivery delays last month
+NP0137,P0137,Midwest,2026-05-14,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0138,P0138,Midwest,2026-05-12,Requested more training on injection techniques
+NP0139,P0139,Southeast,2026-05-26,"Budget cuts mentioned, reducing orders significantly"
+NP0140,P0140,Southwest,2026-05-13,Requested more training on injection techniques
+NP0141,P0141,West,2026-05-26,"No orders in last 60 days, difficult to reach"
+NP0142,P0142,Midwest,2026-05-15,Requested more training on injection techniques
+NP0143,P0143,Midwest,2026-06-03,"Concerned about pricing, may switch to competitor Botox"
+NP0144,P0144,West,2026-05-10,"Concerned about pricing, may switch to competitor Botox"
+NP0145,P0145,Southwest,2026-05-14,"Strong advocate, referring other practices to us"
+NP0146,P0146,Northeast,2026-05-22,"Concerned about pricing, may switch to competitor Botox"
+NP0147,P0147,Southeast,2026-05-18,"No orders in last 60 days, difficult to reach"
+NP0148,P0148,West,2026-05-06,"Strong advocate, referring other practices to us"
+NP0149,P0149,Midwest,2026-05-29,"Strong advocate, referring other practices to us"
+NP0150,P0150,Northeast,2026-05-26,"Expanding clinic, interested in bulk orders"
+NP0151,P0151,Northeast,2026-05-18,"Strong advocate, referring other practices to us"
+NP0152,P0152,Southeast,2026-05-16,"Expanding clinic, interested in bulk orders"
+NP0153,P0153,Midwest,2026-05-11,"Strong advocate, referring other practices to us"
+NP0154,P0154,Southwest,2026-05-10,"Concerned about pricing, may switch to competitor Botox"
+NP0155,P0155,Midwest,2026-05-31,Complained about delivery delays last month
+NP0156,P0156,Northeast,2026-05-08,Requested more training on injection techniques
+NP0157,P0157,Midwest,2026-05-26,"No orders in last 60 days, difficult to reach"
+NP0158,P0158,Southwest,2026-05-05,"Strong advocate, referring other practices to us"
+NP0159,P0159,Southwest,2026-05-12,"Expanding clinic, interested in bulk orders"
+NP0160,P0160,Northeast,2026-06-03,Requested more training on injection techniques
+NP0161,P0161,West,2026-05-08,"Budget cuts mentioned, reducing orders significantly"
+NP0162,P0162,West,2026-06-03,"Concerned about pricing, may switch to competitor Botox"
+NP0163,P0163,Midwest,2026-06-01,"Strong advocate, referring other practices to us"
+NP0164,P0164,Southwest,2026-05-18,"Strong advocate, referring other practices to us"
+NP0165,P0165,Southeast,2026-05-14,"Expanding clinic, interested in bulk orders"
+NP0166,P0166,West,2026-05-11,"Strong advocate, referring other practices to us"
+NP0167,P0167,West,2026-05-29,Requested more training on injection techniques
+NP0168,P0168,Southeast,2026-05-23,Requested more training on injection techniques
+NP0169,P0169,Southwest,2026-05-12,Requested more training on injection techniques
+NP0170,P0170,Midwest,2026-05-28,"Budget cuts mentioned, reducing orders significantly"
+NP0171,P0171,West,2026-05-29,"Concerned about pricing, may switch to competitor Botox"
+NP0172,P0172,Northeast,2026-05-20,"No orders in last 60 days, difficult to reach"
+NP0173,P0173,Southwest,2026-05-29,"No orders in last 60 days, difficult to reach"
+NP0174,P0174,West,2026-06-02,Requested more training on injection techniques
+NP0175,P0175,Northeast,2026-05-09,"No orders in last 60 days, difficult to reach"
+NP0176,P0176,Southeast,2026-05-26,"Strong advocate, referring other practices to us"
+NP0177,P0177,Southeast,2026-05-20,"Concerned about pricing, may switch to competitor Botox"
+NP0178,P0178,Southwest,2026-05-07,Requested more training on injection techniques
+NP0179,P0179,West,2026-06-01,"Expanding clinic, interested in bulk orders"
+NP0180,P0180,West,2026-06-01,"Strong advocate, referring other practices to us"
+NP0181,P0181,Northeast,2026-05-31,"Expanding clinic, interested in bulk orders"
+NP0182,P0182,Northeast,2026-06-01,Complained about delivery delays last month
+NP0183,P0183,Northeast,2026-06-03,"No orders in last 60 days, difficult to reach"
+NP0184,P0184,Midwest,2026-05-19,"Budget cuts mentioned, reducing orders significantly"
+NP0185,P0185,West,2026-05-13,"Concerned about pricing, may switch to competitor Botox"
+NP0186,P0186,West,2026-06-03,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0187,P0187,Southwest,2026-05-26,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0188,P0188,Northeast,2026-05-13,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0189,P0189,Southeast,2026-05-31,"No orders in last 60 days, difficult to reach"
+NP0190,P0190,Southeast,2026-05-18,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0191,P0191,Southeast,2026-05-22,"Expanding clinic, interested in bulk orders"
+NP0192,P0192,Southwest,2026-05-05,"Budget cuts mentioned, reducing orders significantly"
+NP0193,P0193,Midwest,2026-05-19,Complained about delivery delays last month
+NP0194,P0194,Southeast,2026-05-15,"Strong advocate, referring other practices to us"
+NP0195,P0195,Southwest,2026-05-24,Complained about delivery delays last month
+NP0196,P0196,Southeast,2026-05-13,Complained about delivery delays last month
+NP0197,P0197,Midwest,2026-05-24,"No orders in last 60 days, difficult to reach"
+NP0198,P0198,West,2026-05-23,"Strong advocate, referring other practices to us"
+NP0199,P0199,Southwest,2026-05-22,"Practice is ordering regularly, very satisfied with DAXXIFY results"
+NP0200,P0200,Southwest,2026-05-23,Complained about delivery delays last month
