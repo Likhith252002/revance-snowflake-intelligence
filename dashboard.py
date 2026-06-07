@@ -9,14 +9,16 @@ answer three questions, in order of urgency:
   3. Which specific practices does a rep need to call this week, and why?
 
 Everything below reads live from Snowflake and joins the model output
-(CHURN_PREDICTIONS) with the qualitative signal (REP_NOTES_ANALYSIS) so that
-each row in the action queue carries both a probability and the rep's most
-recent note. The UI is dark-themed in Revance brand colors so it can sit on a
-shared TV in the sales bullpen without burning anyone's retinas.
+(CHURN_PREDICTIONS) with the qualitative signal (REP_NOTES_ANALYSIS) so each
+row in the action queue carries both a probability and the rep's most recent
+note. The UI is dark-themed in Revance brand colors with high-contrast HTML
+cards so it can sit on a TV in the sales bullpen and still be readable from
+across the room.
 """
 
 from datetime import datetime, date
 import re
+import html as _html
 
 import pandas as pd
 import plotly.express as px
@@ -27,29 +29,28 @@ import streamlit as st
 from config import SNOWFLAKE_CONFIG
 
 # --- Brand palette -----------------------------------------------------------
-# #C8102E is Revance's primary red. Everything else is built around it so the
-# dashboard feels consistent with their existing collateral.
 REVANCE_RED = "#C8102E"
-DARK_BG = "#1B1B1B"
-CARD_BG = "#242424"
+REVANCE_RED_DEEP = "#8B0E20"
+DARK_BG = "#0F0F0F"
+PANEL_BG = "#1A1A1A"
+CARD_BG = "#222222"
+CARD_BG_RAISED = "#2B2B2B"
 BORDER = "#333333"
+TEXT_PRIMARY = "#F5F5F5"
 TEXT_MUTED = "#9CA3AF"
 SUCCESS = "#22C55E"
 WARNING = "#F59E0B"
 DANGER = "#EF4444"
 
-# Reusable Plotly layout overrides so every chart inherits the dark theme.
 PLOTLY_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
     plot_bgcolor="rgba(0,0,0,0)",
-    font=dict(color="#E5E7EB", family="Inter, -apple-system, sans-serif"),
-    margin=dict(l=10, r=10, t=40, b=10),
+    font=dict(color="#E5E7EB", family="Inter, -apple-system, sans-serif", size=13),
+    margin=dict(l=10, r=10, t=50, b=10),
+    title=dict(font=dict(size=15, color="#FFFFFF")),
 )
 
 RISK_COLORS = {"HIGH": DANGER, "MEDIUM": WARNING, "LOW": SUCCESS}
-
-# Hard-coded for the demo. In production this would come from the most recent
-# model evaluation run (mlflow / a metrics table in Snowflake).
 MODEL_ACCURACY = 0.72
 
 
@@ -60,130 +61,180 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# --- Custom CSS --------------------------------------------------------------
-# Streamlit's default styling is too consumer-y for an internal sales tool.
-# We force a dark canvas, restyle metric cards, give tables a proper border,
-# and theme the sidebar to feel like a real BI product.
+# --- CSS ---------------------------------------------------------------------
+# High-contrast dark theme. Avoids translucent row tints (which wash out to
+# near-white over a dark canvas) by using solid panel backgrounds + colored
+# left borders and chips for status.
 st.markdown(
     f"""
     <style>
         .stApp {{
             background-color: {DARK_BG};
-            color: #F3F4F6;
+            color: {TEXT_PRIMARY};
         }}
         section[data-testid="stSidebar"] {{
-            background-color: #141414;
+            background-color: #0B0B0B;
             border-right: 1px solid {BORDER};
         }}
-        section[data-testid="stSidebar"] * {{
-            color: #E5E7EB !important;
-        }}
+        section[data-testid="stSidebar"] * {{ color: #E5E7EB !important; }}
         h1, h2, h3, h4 {{
             color: #FFFFFF !important;
             font-family: Inter, -apple-system, sans-serif;
             letter-spacing: -0.01em;
         }}
+        .block-container {{ padding-top: 2rem !important; }}
+
+        /* Section headers — bigger, clearer separation between sections */
         .section-header {{
-            border-left: 3px solid {REVANCE_RED};
-            padding-left: 0.85rem;
-            margin: 2rem 0 1rem 0;
+            border-left: 4px solid {REVANCE_RED};
+            padding: 0.1rem 0 0.1rem 1rem;
+            margin: 2.5rem 0 1.25rem 0;
         }}
         .section-header h2 {{
-            margin: 0;
-            font-size: 1.35rem;
-            font-weight: 600;
+            margin: 0; font-size: 1.5rem; font-weight: 700;
         }}
         .section-header p {{
-            margin: 0.25rem 0 0 0;
-            color: {TEXT_MUTED};
-            font-size: 0.85rem;
+            margin: 0.3rem 0 0 0; color: {TEXT_MUTED}; font-size: 0.92rem;
         }}
-        .metric-card {{
+
+        /* KPI cards */
+        .kpi {{
             background-color: {CARD_BG};
             border: 1px solid {BORDER};
             border-radius: 10px;
-            padding: 1.1rem 1.25rem;
-            min-height: 110px;
+            padding: 1.1rem 1.25rem 1.15rem 1.25rem;
+            min-height: 124px;
+            position: relative;
         }}
-        .metric-card.high   {{ border-left: 4px solid {DANGER}; }}
-        .metric-card.medium {{ border-left: 4px solid {WARNING}; }}
-        .metric-card.low    {{ border-left: 4px solid {SUCCESS}; }}
-        .metric-card.brand  {{ border-left: 4px solid {REVANCE_RED}; }}
-        .metric-label {{
-            color: {TEXT_MUTED};
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 0.4rem;
+        .kpi.high   {{ border-left: 4px solid {DANGER}; }}
+        .kpi.medium {{ border-left: 4px solid {WARNING}; }}
+        .kpi.low    {{ border-left: 4px solid {SUCCESS}; }}
+        .kpi.brand  {{ border-left: 4px solid {REVANCE_RED}; }}
+        .kpi-label {{
+            color: {TEXT_MUTED}; font-size: 0.72rem;
+            text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;
         }}
-        .metric-value {{
-            color: #FFFFFF;
-            font-size: 1.85rem;
-            font-weight: 700;
-            line-height: 1.1;
+        .kpi-value {{
+            color: #FFFFFF; font-size: 2rem; font-weight: 700; line-height: 1;
         }}
-        .metric-sub {{
-            color: {TEXT_MUTED};
-            font-size: 0.78rem;
-            margin-top: 0.35rem;
-        }}
+        .kpi-sub {{ color: {TEXT_MUTED}; font-size: 0.82rem; margin-top: 0.5rem; }}
+
+        /* Executive banner */
         .exec-banner {{
-            background: linear-gradient(135deg, #1F1F1F 0%, #2A0F12 60%, #3A0B14 100%);
-            border: 1px solid {BORDER};
-            border-radius: 14px;
-            padding: 1.75rem 2rem;
-            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #1F0A0E 0%, #3A0A14 55%, #5A1119 100%);
+            border: 1px solid #4A1A22;
+            border-radius: 16px;
+            padding: 2rem 2.25rem;
+            margin: 0.5rem 0 1.5rem 0;
+            box-shadow: 0 6px 24px rgba(200, 16, 46, 0.15);
+        }}
+        .exec-label {{
+            margin: 0; color: #E5C5C9; font-size: 0.78rem;
+            letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600;
         }}
         .exec-headline {{
-            font-size: 2.4rem;
-            font-weight: 800;
-            color: #FFFFFF;
-            line-height: 1.1;
-            margin: 0;
+            font-size: 3.5rem; font-weight: 800; color: #FFFFFF;
+            line-height: 1; margin: 0.4rem 0 0 0; display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
         }}
-        .exec-score-pill {{
-            display: inline-block;
-            padding: 0.3rem 0.85rem;
-            border-radius: 999px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-left: 0.75rem;
-            vertical-align: middle;
+        .exec-headline .of {{ color: rgba(255,255,255,0.55); font-size: 1.8rem; font-weight: 500; }}
+        .pill {{
+            display: inline-block; padding: 0.35rem 0.95rem; border-radius: 999px;
+            font-weight: 700; font-size: 0.78rem; letter-spacing: 0.05em;
+            text-transform: uppercase; vertical-align: middle;
         }}
         .exec-sub {{
-            color: #D1D5DB;
-            font-size: 1.05rem;
-            margin-top: 0.6rem;
+            color: #F5F5F5; font-size: 1.1rem; margin: 0.9rem 0 0 0; line-height: 1.55;
         }}
-        .exec-timestamp {{
-            color: {TEXT_MUTED};
-            font-size: 0.8rem;
-            margin-top: 0.4rem;
+        .exec-timestamp {{ color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-top: 0.5rem; }}
+
+        /* Takeaway strip — 3 callouts under the banner */
+        .takeaway {{
+            background: {PANEL_BG}; border: 1px solid {BORDER}; border-radius: 10px;
+            padding: 1rem 1.15rem; height: 100%;
         }}
+        .takeaway-icon {{ font-size: 1.4rem; margin-bottom: 0.4rem; }}
+        .takeaway-title {{
+            color: {TEXT_MUTED}; font-size: 0.72rem;
+            text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.4rem;
+        }}
+        .takeaway-body {{ color: #FFFFFF; font-size: 1rem; line-height: 1.4; }}
+        .takeaway-body b {{ color: #FFFFFF; }}
+
+        /* Territory leaderboard rows */
+        .leader-row {{
+            display: grid;
+            grid-template-columns: 60px 1.5fr 1fr 1fr 1fr 1fr 1fr;
+            gap: 1rem; align-items: center;
+            background: {CARD_BG}; border: 1px solid {BORDER}; border-radius: 10px;
+            padding: 1rem 1.25rem; margin-bottom: 0.6rem;
+        }}
+        .leader-row.crown {{
+            background: linear-gradient(90deg, {CARD_BG_RAISED} 0%, {CARD_BG} 60%);
+            border: 1px solid {REVANCE_RED};
+        }}
+        .leader-row.alarm {{ border-left: 4px solid {DANGER}; }}
+        .leader-row.watch {{ border-left: 4px solid {WARNING}; }}
+        .leader-row.good  {{ border-left: 4px solid {SUCCESS}; }}
+        .leader-rank {{
+            font-size: 1.6rem; font-weight: 800; color: {TEXT_MUTED}; text-align: center;
+        }}
+        .leader-row.crown .leader-rank {{ color: {REVANCE_RED}; }}
+        .leader-name {{ font-size: 1.15rem; font-weight: 700; color: #FFFFFF; }}
+        .leader-cell {{ color: #E5E7EB; font-size: 0.95rem; }}
+        .leader-cell .lbl {{
+            display: block; color: {TEXT_MUTED}; font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.15rem;
+        }}
+        .leader-cell .val {{ font-weight: 700; }}
+
+        /* Action queue rows */
+        .action-row {{
+            display: grid;
+            grid-template-columns: 50px 2fr 1fr 1fr 1fr 2.5fr;
+            gap: 1rem; align-items: center;
+            background: {CARD_BG}; border: 1px solid {BORDER}; border-radius: 10px;
+            padding: 1rem 1.25rem; margin-bottom: 0.6rem;
+        }}
+        .action-row.HIGH   {{ border-left: 4px solid {DANGER}; }}
+        .action-row.MEDIUM {{ border-left: 4px solid {WARNING}; }}
+        .action-row.LOW    {{ border-left: 4px solid {SUCCESS}; }}
+        .action-rank {{
+            font-size: 1.5rem; font-weight: 800; color: #FFFFFF; text-align: center;
+        }}
+        .action-practice {{ font-size: 1.05rem; font-weight: 700; color: #FFFFFF; }}
+        .action-practice .terr {{
+            display: block; color: {TEXT_MUTED}; font-size: 0.78rem; margin-top: 0.15rem; font-weight: 500;
+        }}
+        .action-num {{ color: #FFFFFF; font-weight: 700; font-size: 1.1rem; }}
+        .action-num .lbl {{
+            display: block; color: {TEXT_MUTED}; font-size: 0.68rem;
+            text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.1rem; font-weight: 600;
+        }}
+        .action-note {{ color: #E5E7EB; font-size: 0.88rem; line-height: 1.4; }}
+        .action-note .rec {{
+            display: block; color: {REVANCE_RED}; font-weight: 700; margin-top: 0.3rem; font-size: 0.85rem;
+        }}
+
+        /* Insight callout */
         .insight-card {{
-            background-color: {CARD_BG};
-            border: 1px solid {BORDER};
-            border-left: 3px solid {REVANCE_RED};
-            border-radius: 8px;
-            padding: 1rem 1.2rem;
-            color: #E5E7EB;
-            margin: 0.5rem 0;
+            background: {PANEL_BG}; border: 1px solid {BORDER};
+            border-left: 3px solid {REVANCE_RED}; border-radius: 8px;
+            padding: 1rem 1.2rem; color: #E5E7EB; margin: 0.75rem 0;
         }}
+
+        /* Deep dive rep-note cards */
+        .note-card {{
+            background: {CARD_BG}; border: 1px solid {BORDER};
+            border-left: 3px solid {REVANCE_RED}; border-radius: 8px;
+            padding: 0.85rem 1rem; margin-bottom: 0.5rem;
+        }}
+        .note-meta {{ color: {TEXT_MUTED}; font-size: 0.78rem; }}
+        .note-body {{ color: #FFFFFF; font-size: 0.95rem; margin-top: 0.3rem; }}
+        .note-tag  {{ color: {TEXT_MUTED}; font-size: 0.78rem; margin-top: 0.3rem; }}
+
         .footer {{
-            border-top: 1px solid {BORDER};
-            margin-top: 3rem;
-            padding-top: 1.5rem;
-            color: {TEXT_MUTED};
-            font-size: 0.85rem;
-        }}
-        div[data-testid="stDataFrame"] {{
-            border: 1px solid {BORDER};
-            border-radius: 8px;
-        }}
-        div[data-testid="stSelectbox"] label,
-        div[data-testid="stMultiSelect"] label,
-        div[data-testid="stSlider"] label {{
-            color: #E5E7EB !important;
+            border-top: 1px solid {BORDER}; margin-top: 3rem; padding-top: 1.5rem;
+            color: {TEXT_MUTED}; font-size: 0.85rem;
         }}
     </style>
     """,
@@ -192,14 +243,12 @@ st.markdown(
 
 
 # --- Data load ---------------------------------------------------------------
-# One cached fetch on session start; the footer's "Refresh" button clears it.
 @st.cache_data(show_spinner="Loading from Snowflake...")
 def load_data():
     conn = snowflake.connector.connect(**SNOWFLAKE_CONFIG)
     cur = conn.cursor()
     cur.execute("USE WAREHOUSE COMPUTE_WH")
 
-    # Practices joined with churn scores — the spine of the dashboard.
     cur.execute(
         """
         SELECT p.PRACTICE_ID, p.PRACTICE_NAME, p.TERRITORY, p.PRACTICE_TYPE,
@@ -216,7 +265,6 @@ def load_data():
     practices["CHURN_RISK"] = practices["CHURN_RISK"].astype(float)
     practices["MONTHS_ACTIVE"] = practices["MONTHS_ACTIVE"].astype(int)
 
-    # Full orders — we need ORDER_DATE per row to compute "days since last order".
     cur.execute("SELECT ORDER_ID, PRACTICE_ID, PRODUCT, ORDER_DATE, QUANTITY, REVENUE, TERRITORY FROM ORDERS")
     orders = pd.DataFrame(
         cur.fetchall(),
@@ -225,7 +273,6 @@ def load_data():
     orders["ORDER_DATE"] = pd.to_datetime(orders["ORDER_DATE"])
     orders["REVENUE"] = orders["REVENUE"].astype(float)
 
-    # Notes + the sentiment / risk-insight analysis output.
     cur.execute(
         """
         SELECT n.PRACTICE_ID, n.TERRITORY, n.NOTE_DATE, n.REP_NOTES,
@@ -248,18 +295,10 @@ def load_data():
 practices_all, orders_all, notes_all = load_data()
 
 
-# --- Per-practice revenue & recency ------------------------------------------
-# Computed once from the unfiltered order book so the global "at-risk revenue"
-# calculation stays stable regardless of the sidebar filters.
-practice_revenue = (
-    orders_all.groupby("PRACTICE_ID")["REVENUE"].sum().rename("PRACTICE_REVENUE")
-)
-practice_products = (
-    orders_all.groupby("PRACTICE_ID")["PRODUCT"].nunique().rename("PRODUCT_COUNT")
-)
-last_order = (
-    orders_all.groupby("PRACTICE_ID")["ORDER_DATE"].max().rename("LAST_ORDER")
-)
+# --- Per-practice revenue & recency (computed from full book) ---------------
+practice_revenue = orders_all.groupby("PRACTICE_ID")["REVENUE"].sum().rename("PRACTICE_REVENUE")
+practice_products = orders_all.groupby("PRACTICE_ID")["PRODUCT"].nunique().rename("PRODUCT_COUNT")
+last_order = orders_all.groupby("PRACTICE_ID")["ORDER_DATE"].max().rename("LAST_ORDER")
 today = pd.Timestamp(datetime.now().date())
 days_since = (today - last_order).dt.days.rename("DAYS_SINCE_LAST_ORDER")
 
@@ -272,10 +311,14 @@ practices_all = (
 )
 
 
-# --- Sidebar filters (I) -----------------------------------------------------
+# --- Sidebar filters ---------------------------------------------------------
 with st.sidebar:
     st.markdown(f"<h2 style='color:{REVANCE_RED};margin-top:0;'>Revance</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#9CA3AF;margin-top:-12px;font-size:0.8rem;'>PRACTICE INTELLIGENCE</p>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='color:#9CA3AF;margin-top:-12px;font-size:0.78rem;letter-spacing:0.1em;'>"
+        "PRACTICE INTELLIGENCE</p>",
+        unsafe_allow_html=True,
+    )
     st.markdown("---")
     st.markdown("### Filters")
 
@@ -292,20 +335,17 @@ with st.sidebar:
     rev_max = int(practices_all["PRACTICE_REVENUE"].max()) or 1
     sel_rev = st.slider(
         "Practice Revenue ($)",
-        min_value=rev_min,
-        max_value=rev_max,
-        value=(rev_min, rev_max),
+        min_value=rev_min, max_value=rev_max, value=(rev_min, rev_max),
         step=max((rev_max - rev_min) // 50, 1),
     )
 
     st.markdown("---")
     st.markdown(
-        f"<p style='color:{TEXT_MUTED};font-size:0.75rem;'>Filters update every chart and table on this page.</p>",
+        f"<p style='color:{TEXT_MUTED};font-size:0.75rem;'>Filters apply to every chart on the page.</p>",
         unsafe_allow_html=True,
     )
 
 
-# Apply filters once; everything downstream consumes `practices`.
 mask = (
     practices_all["TERRITORY"].isin(sel_territory)
     & practices_all["RISK_LABEL"].isin(sel_risk)
@@ -317,13 +357,12 @@ orders = orders_all[orders_all["PRACTICE_ID"].isin(practices["PRACTICE_ID"])].co
 notes = notes_all[notes_all["PRACTICE_ID"].isin(practices["PRACTICE_ID"])].copy()
 
 
-# --- Empty state -------------------------------------------------------------
 if practices.empty:
     st.warning("No practices match the current filters. Loosen the sidebar selections to see data.")
     st.stop()
 
 
-# --- Pre-computed slices used in multiple sections ---------------------------
+# --- Shared aggregates -------------------------------------------------------
 high_risk = practices[practices["RISK_LABEL"] == "HIGH"]
 med_risk = practices[practices["RISK_LABEL"] == "MEDIUM"]
 low_risk = practices[practices["RISK_LABEL"] == "LOW"]
@@ -332,62 +371,99 @@ total_practices = len(practices)
 high_pct = len(high_risk) / total_practices * 100 if total_practices else 0
 med_pct = len(med_risk) / total_practices * 100 if total_practices else 0
 
-# Practice Health Score: 100 minus weighted risk drag. A clean book stays in
-# the 90s; a book that is mostly HIGH risk drops to the 40s. Tuned so the
-# default 200-practice demo lands in the amber 70s.
+# Portfolio Health Score — see ARCHITECTURE.md for the weighting rationale.
 health_score = max(0, round(100 - high_pct * 1.0 - med_pct * 0.4))
 health_color = SUCCESS if health_score >= 75 else (WARNING if health_score >= 60 else DANGER)
 health_label = "Healthy" if health_score >= 75 else ("Watch" if health_score >= 60 else "At Risk")
 
-# At-risk revenue: sum of historical revenue from HIGH-risk practices.
-# This is the dollar exposure if the rep team doesn't intervene this quarter.
 at_risk_revenue = high_risk["PRACTICE_REVENUE"].sum()
 total_revenue = practices["PRACTICE_REVENUE"].sum()
-# If we cut the HIGH-risk churn rate in half, this is the revenue saved.
 revenue_saved_potential = at_risk_revenue * 0.5
 
 
 def section_header(title: str, subtitle: str = ""):
+    sub_html = f"<p>{_html.escape(subtitle)}</p>" if subtitle else ""
     st.markdown(
-        f"""<div class='section-header'><h2>{title}</h2>
-        {'<p>' + subtitle + '</p>' if subtitle else ''}</div>""",
+        f"<div class='section-header'><h2>{_html.escape(title)}</h2>{sub_html}</div>",
         unsafe_allow_html=True,
     )
 
 
-# =============================================================================
-# A) EXECUTIVE SUMMARY BANNER
-# =============================================================================
-banner_html = f"""
-<div class='exec-banner'>
-    <p style='margin:0;color:{TEXT_MUTED};font-size:0.85rem;letter-spacing:0.1em;text-transform:uppercase;'>
-        Practice Health Score
-    </p>
-    <p class='exec-headline'>
-        {health_score}<span style='color:{TEXT_MUTED};font-size:1.5rem;font-weight:500;'>/100</span>
-        <span class='exec-score-pill' style='background:{health_color};color:#0B0B0B;'>{health_label}</span>
-    </p>
-    <p class='exec-sub'>
-        Your portfolio has <b style='color:{DANGER};'>{len(high_risk)} high-risk practices</b>
-        representing <b style='color:#FFFFFF;'>${at_risk_revenue/1_000_000:.1f}M</b> in at-risk revenue.
-    </p>
-    <p class='exec-timestamp'>Last updated {datetime.now().strftime('%b %d, %Y · %I:%M %p')}</p>
-</div>
-"""
-st.markdown(banner_html, unsafe_allow_html=True)
-
-
-# Top KPIs as styled HTML cards (st.metric won't let us color the border).
 def kpi_card(label, value, sub="", variant="brand"):
     return f"""
-    <div class='metric-card {variant}'>
-        <div class='metric-label'>{label}</div>
-        <div class='metric-value'>{value}</div>
-        <div class='metric-sub'>{sub}</div>
+    <div class='kpi {variant}'>
+        <div class='kpi-label'>{_html.escape(label)}</div>
+        <div class='kpi-value'>{value}</div>
+        <div class='kpi-sub'>{_html.escape(sub)}</div>
     </div>
     """
 
 
+# =============================================================================
+# EXECUTIVE SUMMARY BANNER
+# =============================================================================
+st.markdown(
+    f"""
+    <div class='exec-banner'>
+        <p class='exec-label'>Portfolio Health Score</p>
+        <div class='exec-headline'>
+            <span>{health_score}<span class='of'>/100</span></span>
+            <span class='pill' style='background:{health_color};color:#0B0B0B;'>{health_label}</span>
+        </div>
+        <p class='exec-sub'>
+            <b style='color:{DANGER};'>{len(high_risk)} high-risk practices</b> ·
+            <b style='color:#FFFFFF;'>${at_risk_revenue/1_000_000:.1f}M at-risk revenue</b> ·
+            <b style='color:#FFFFFF;'>${total_revenue/1_000_000:.1f}M total tracked</b>
+        </p>
+        <p class='exec-timestamp'>Last updated {datetime.now().strftime('%b %d, %Y · %I:%M %p')}</p>
+    </div>
+    """,
+    unsafe_allow_html=True,
+)
+
+
+# --- Takeaway strip — three at-a-glance callouts -----------------------------
+worst_territory = (
+    practices.groupby("TERRITORY")["RISK_LABEL"]
+    .apply(lambda s: (s == "HIGH").sum())
+    .idxmax()
+)
+worst_territory_count = (
+    practices[practices["TERRITORY"] == worst_territory]["RISK_LABEL"].eq("HIGH").sum()
+)
+sent_by_terr_quick = notes.groupby("TERRITORY")["SENTIMENT_SCORE"].mean()
+neg_terrs = sent_by_terr_quick[sent_by_terr_quick < 0.15].index.tolist()
+neg_terr_text = ", ".join(neg_terrs) if neg_terrs else "None"
+
+t1, t2, t3 = st.columns(3)
+t1.markdown(
+    f"""<div class='takeaway' style='border-left:3px solid {DANGER};'>
+        <div class='takeaway-icon'>🚨</div>
+        <div class='takeaway-title'>Most urgent territory</div>
+        <div class='takeaway-body'><b>{worst_territory}</b> — {worst_territory_count} high-risk practices need calls this week.</div>
+    </div>""",
+    unsafe_allow_html=True,
+)
+t2.markdown(
+    f"""<div class='takeaway' style='border-left:3px solid {WARNING};'>
+        <div class='takeaway-icon'>💰</div>
+        <div class='takeaway-title'>Save target this quarter</div>
+        <div class='takeaway-body'>Cutting HIGH-risk churn in half would protect <b>${revenue_saved_potential/1_000_000:.2f}M</b> in revenue.</div>
+    </div>""",
+    unsafe_allow_html=True,
+)
+t3.markdown(
+    f"""<div class='takeaway' style='border-left:3px solid {REVANCE_RED};'>
+        <div class='takeaway-icon'>📉</div>
+        <div class='takeaway-title'>Sentiment alarms</div>
+        <div class='takeaway-body'><b>{neg_terr_text}</b> — rep-note sentiment is in the warning band.</div>
+    </div>""",
+    unsafe_allow_html=True,
+)
+
+
+# --- KPI strip --------------------------------------------------------------
+section_header("Portfolio at a Glance", "Headline counts across the filtered book of business.")
 c1, c2, c3, c4 = st.columns(4)
 c1.markdown(kpi_card("Total Practices", f"{total_practices}", "across all territories", "brand"), unsafe_allow_html=True)
 c2.markdown(kpi_card("High Risk", f"{len(high_risk)}", f"{high_pct:.0f}% of portfolio", "high"), unsafe_allow_html=True)
@@ -396,43 +472,38 @@ c4.markdown(kpi_card("Total Revenue", f"${total_revenue/1_000_000:.1f}M", "trail
 
 
 # =============================================================================
-# B) AT-RISK REVENUE CALCULATOR
+# AT-RISK REVENUE
 # =============================================================================
 section_header(
     "At-Risk Revenue",
-    "Exposure from HIGH-risk practices and the upside if churn is cut in half.",
+    "Dollar exposure from HIGH-risk practices and the upside if churn is halved.",
 )
-b1, b2 = st.columns(2)
+b1, b2, b3 = st.columns(3)
 b1.markdown(
-    kpi_card(
-        "Revenue at Risk",
-        f"${at_risk_revenue/1_000_000:.2f}M",
-        f"From {len(high_risk)} HIGH-risk practices",
-        "high",
-    ),
+    kpi_card("Revenue at Risk", f"${at_risk_revenue/1_000_000:.2f}M",
+             f"From {len(high_risk)} HIGH-risk practices", "high"),
     unsafe_allow_html=True,
 )
 b2.markdown(
-    kpi_card(
-        "Potential Saved",
-        f"${revenue_saved_potential/1_000_000:.2f}M",
-        "If HIGH-risk churn drops 50%",
-        "low",
-    ),
+    kpi_card("Potential Saved", f"${revenue_saved_potential/1_000_000:.2f}M",
+             "If HIGH-risk churn drops 50%", "low"),
+    unsafe_allow_html=True,
+)
+b3.markdown(
+    kpi_card("Avg HIGH-risk practice", f"${(at_risk_revenue/max(len(high_risk),1))/1_000:.0f}K",
+             "Average revenue per HIGH-risk account", "medium"),
     unsafe_allow_html=True,
 )
 
 
 # =============================================================================
-# C) TERRITORY LEADERBOARD
+# TERRITORY LEADERBOARD — rendered as solid HTML cards, not a tinted table
 # =============================================================================
 section_header(
     "Territory Leaderboard",
-    "Health score ranks territories so leadership knows where to deploy rep attention.",
+    "Ranked by health score so leadership knows where to deploy rep attention.",
 )
 
-# Aggregate per territory. Avg sentiment comes from rep notes, not from the
-# model — it's a separate qualitative signal.
 terr = (
     practices.groupby("TERRITORY")
     .agg(
@@ -445,71 +516,92 @@ terr = (
 sent_by_terr = notes.groupby("TERRITORY")["SENTIMENT_SCORE"].mean().rename("avg_sentiment")
 terr = terr.merge(sent_by_terr, on="TERRITORY", how="left").fillna({"avg_sentiment": 0})
 terr["high_risk_pct"] = terr["high_risk"] / terr["practices"] * 100
-terr["health_score"] = (100 - terr["high_risk_pct"] * 1.0).clip(lower=0).round(0)
+terr["health_score"] = (100 - terr["high_risk_pct"] * 1.0).clip(lower=0).round(0).astype(int)
 terr = terr.sort_values("health_score", ascending=False).reset_index(drop=True)
 
-# Crown the best territory; rank everyone else by health score.
-def crown(row):
-    return "👑 " + row["TERRITORY"] if row.name == 0 else row["TERRITORY"]
+
+def health_class(score: int) -> str:
+    if score >= 75:
+        return "good"
+    if score >= 60:
+        return "watch"
+    return "alarm"
 
 
-terr["Territory"] = terr.apply(crown, axis=1)
-terr_display = pd.DataFrame({
-    "Rank": (terr.index + 1).astype(str),
-    "Territory": terr["Territory"],
-    "Health": terr["health_score"].astype(int),
-    "Practices": terr["practices"],
-    "High Risk": terr["high_risk"],
-    "Revenue": terr["revenue"].apply(lambda v: f"${v/1_000_000:.2f}M"),
-    "Avg Sentiment": terr["avg_sentiment"].round(2),
-})
+def health_chip_color(score: int) -> str:
+    return SUCCESS if score >= 75 else (WARNING if score >= 60 else DANGER)
 
 
-def style_leaderboard(row):
-    score = row["Health"]
-    color = SUCCESS if score >= 75 else WARNING if score >= 60 else DANGER
-    return [f"background-color: {color}22; color: #FFFFFF;"] * len(row)
-
-
-st.dataframe(
-    terr_display.style.apply(style_leaderboard, axis=1),
-    hide_index=True,
-    use_container_width=True,
-)
+leader_html = ""
+for i, row in terr.iterrows():
+    is_crown = i == 0
+    cls = "leader-row " + health_class(row["health_score"])
+    if is_crown:
+        cls += " crown"
+    rank_text = "👑" if is_crown else f"#{i+1}"
+    chip = health_chip_color(row["health_score"])
+    leader_html += f"""
+    <div class='{cls}'>
+        <div class='leader-rank'>{rank_text}</div>
+        <div class='leader-name'>{_html.escape(row['TERRITORY'])}</div>
+        <div class='leader-cell'>
+            <span class='lbl'>Health</span>
+            <span class='val' style='color:{chip};font-size:1.2rem;'>{row['health_score']}<span style='color:{TEXT_MUTED};font-size:0.85rem;'>/100</span></span>
+        </div>
+        <div class='leader-cell'>
+            <span class='lbl'>Practices</span>
+            <span class='val'>{int(row['practices'])}</span>
+        </div>
+        <div class='leader-cell'>
+            <span class='lbl'>High Risk</span>
+            <span class='val' style='color:{DANGER};'>{int(row['high_risk'])}</span>
+        </div>
+        <div class='leader-cell'>
+            <span class='lbl'>Revenue</span>
+            <span class='val'>${row['revenue']/1_000_000:.2f}M</span>
+        </div>
+        <div class='leader-cell'>
+            <span class='lbl'>Avg Sentiment</span>
+            <span class='val' style='color:{SUCCESS if row["avg_sentiment"] >= 0.15 else (WARNING if row["avg_sentiment"] >= 0 else DANGER)};'>
+                {row['avg_sentiment']:+.2f}
+            </span>
+        </div>
+    </div>
+    """
+st.markdown(leader_html, unsafe_allow_html=True)
 
 
 # =============================================================================
-# D) PRODUCT PENETRATION ANALYSIS
+# PRODUCT PENETRATION
 # =============================================================================
 section_header(
     "Product Penetration",
-    "Practices that buy across the line are stickier — single-product accounts churn first.",
+    "Practices buying across the line are stickier — single-product accounts churn first.",
 )
 
-# Single-product vs multi-product (3+) churn comparison. The dashboard
-# headline insight comes straight from the data — no hard-coded numbers.
 single = practices[practices["PRODUCT_COUNT"] <= 1]
 multi = practices[practices["PRODUCT_COUNT"] >= 3]
 churn_single = single["CHURN_RISK"].mean() if len(single) else 0
 churn_multi = multi["CHURN_RISK"].mean() if len(multi) else 0
 delta_pct = ((churn_single - churn_multi) / churn_single * 100) if churn_single else 0
 
-d1, d2 = st.columns([1, 1.4])
-
+d1, d2 = st.columns([1, 1.5])
 with d1:
     st.markdown(
-        kpi_card("Single-Product Practices", f"{len(single)}", f"avg churn risk {churn_single*100:.0f}%", "high"),
+        kpi_card("Single-Product Practices", f"{len(single)}",
+                 f"avg churn risk {churn_single*100:.0f}%", "high"),
         unsafe_allow_html=True,
     )
     st.markdown(
-        kpi_card("Multi-Product (3+) Practices", f"{len(multi)}", f"avg churn risk {churn_multi*100:.0f}%", "low"),
+        kpi_card("Multi-Product (3+) Practices", f"{len(multi)}",
+                 f"avg churn risk {churn_multi*100:.0f}%", "low"),
         unsafe_allow_html=True,
     )
     st.markdown(
         f"""<div class='insight-card'>
         <b style='color:{REVANCE_RED};'>Insight:</b> Practices ordering 3+ products
-        have <b>{delta_pct:.0f}%</b> lower churn risk on average. The fastest path
-        to portfolio stability is cross-sell from DAXXIFY anchors into RHA fillers.
+        have <b style='color:#FFFFFF;'>{delta_pct:.0f}% lower</b> churn risk.
+        The fastest path to portfolio stability is cross-sell from DAXXIFY anchors into RHA fillers.
         </div>""",
         unsafe_allow_html=True,
     )
@@ -517,27 +609,23 @@ with d1:
 with d2:
     prod_by_terr = (
         orders.groupby(["TERRITORY", "PRODUCT"])["PRACTICE_ID"]
-        .nunique()
-        .reset_index(name="Practices")
+        .nunique().reset_index(name="Practices")
     )
     fig = px.bar(
-        prod_by_terr,
-        x="TERRITORY",
-        y="Practices",
-        color="PRODUCT",
-        title="Product adoption — practices ordering each product per territory",
-        color_discrete_sequence=px.colors.sequential.Reds_r,
+        prod_by_terr, x="TERRITORY", y="Practices", color="PRODUCT",
+        title="Practices ordering each product, by territory",
+        color_discrete_sequence=["#C8102E", "#E63946", "#F87171", "#FCA5A5", "#FECACA", "#FEE2E2"],
     )
-    fig.update_layout(**PLOTLY_LAYOUT, legend=dict(bgcolor="rgba(0,0,0,0)"))
+    fig.update_layout(**PLOTLY_LAYOUT, legend=dict(bgcolor="rgba(0,0,0,0)", title=""))
     st.plotly_chart(fig, use_container_width=True)
 
 
 # =============================================================================
-# E) REP PERFORMANCE INSIGHTS
+# REP PERFORMANCE
 # =============================================================================
 section_header(
     "Rep Performance",
-    "Sentiment is the leading indicator — order data follows it by weeks.",
+    "Sentiment is a leading indicator — order data follows it by weeks.",
 )
 e1, e2 = st.columns([1.3, 1])
 
@@ -547,13 +635,11 @@ with e1:
         lambda v: DANGER if v < 0 else (WARNING if v < 0.15 else SUCCESS)
     )
     fig = px.bar(
-        sent_avg,
-        x="TERRITORY",
-        y="SENTIMENT_SCORE",
-        title="Avg rep-note sentiment by territory (warning band < 0.15, alarm < 0)",
+        sent_avg, x="TERRITORY", y="SENTIMENT_SCORE",
+        title="Avg rep-note sentiment by territory  (alarm < 0, watch < 0.15)",
     )
     fig.update_traces(marker_color=sent_avg["color"])
-    fig.update_layout(**PLOTLY_LAYOUT, yaxis_title="Avg sentiment")
+    fig.update_layout(**PLOTLY_LAYOUT, yaxis_title="Avg sentiment", xaxis_title="")
     st.plotly_chart(fig, use_container_width=True)
 
     flagged = sent_avg[sent_avg["SENTIMENT_SCORE"] < 0]["TERRITORY"].tolist()
@@ -567,7 +653,6 @@ with e1:
         )
 
 with e2:
-    # Extract the most common risk keywords from the rep-note free text.
     keyword_pool = [
         "switch", "competitor", "Botox", "pricing", "budget", "cuts",
         "delivery", "delays", "training", "concerned", "expanding",
@@ -582,20 +667,16 @@ with e2:
     counts.sort(key=lambda x: x[1], reverse=True)
     top_keywords = pd.DataFrame(counts[:8], columns=["Keyword", "Mentions"])
     fig = px.bar(
-        top_keywords,
-        x="Mentions",
-        y="Keyword",
-        orientation="h",
+        top_keywords, x="Mentions", y="Keyword", orientation="h",
         title="Most common signals in rep notes",
-        color="Mentions",
-        color_continuous_scale=["#7A1D1D", REVANCE_RED, "#F87171"],
+        color="Mentions", color_continuous_scale=["#7A1D1D", REVANCE_RED, "#F87171"],
     )
-    fig.update_layout(**PLOTLY_LAYOUT, yaxis=dict(categoryorder="total ascending"))
+    fig.update_layout(**PLOTLY_LAYOUT, yaxis=dict(categoryorder="total ascending", title=""), coloraxis_showscale=False)
     st.plotly_chart(fig, use_container_width=True)
 
 
 # =============================================================================
-# F) CHURN PREDICTION CONFIDENCE
+# MODEL CONFIDENCE
 # =============================================================================
 section_header(
     "Model Confidence",
@@ -605,27 +686,24 @@ f1, f2 = st.columns([1.4, 1])
 
 with f1:
     fig = px.histogram(
-        practices,
-        x="CHURN_RISK",
-        nbins=25,
-        color="RISK_LABEL",
+        practices, x="CHURN_RISK", nbins=25, color="RISK_LABEL",
         color_discrete_map=RISK_COLORS,
         title="Churn-risk distribution across the portfolio",
     )
-    fig.update_layout(**PLOTLY_LAYOUT, bargap=0.05, xaxis_title="Predicted churn probability")
+    fig.update_layout(**PLOTLY_LAYOUT, bargap=0.05, xaxis_title="Predicted churn probability",
+                      legend=dict(bgcolor="rgba(0,0,0,0)", title=""))
     st.plotly_chart(fig, use_container_width=True)
 
 with f2:
-    # Half-circle gauge — 0–100% with the model's accuracy plotted on it.
     gauge = go.Figure(go.Indicator(
         mode="gauge+number",
         value=MODEL_ACCURACY * 100,
-        number={"suffix": "%", "font": {"size": 42, "color": "#FFFFFF"}},
+        number={"suffix": "%", "font": {"size": 48, "color": "#FFFFFF"}},
         title={"text": "Model Accuracy<br><span style='font-size:0.8em;color:#9CA3AF;'>held-out test set</span>",
-               "font": {"color": "#FFFFFF"}},
+               "font": {"color": "#FFFFFF", "size": 14}},
         gauge={
             "axis": {"range": [0, 100], "tickcolor": "#9CA3AF"},
-            "bar": {"color": REVANCE_RED, "thickness": 0.3},
+            "bar": {"color": REVANCE_RED, "thickness": 0.32},
             "bgcolor": CARD_BG,
             "borderwidth": 0,
             "steps": [
@@ -640,28 +718,24 @@ with f2:
 
 
 # =============================================================================
-# H) ACTION PRIORITY QUEUE
+# ACTION PRIORITY QUEUE — rendered as solid HTML cards
 # =============================================================================
 section_header(
     "Action Priority Queue",
-    "Top 10 practices the rep team should contact this week, ranked by risk × revenue.",
+    "The 10 practices the rep team should contact this week, ranked by churn risk × revenue.",
 )
 
-# Composite priority: high risk that also has dollars on the line.
 practices["AT_RISK_REVENUE"] = practices["CHURN_RISK"] * practices["PRACTICE_REVENUE"]
 queue = practices.sort_values("AT_RISK_REVENUE", ascending=False).head(10).copy()
 
-# Pull the most recent rep note per practice for context in the queue.
 notes_sorted = notes.sort_values("NOTE_DATE", ascending=False).drop_duplicates("PRACTICE_ID")
 queue = queue.merge(
     notes_sorted[["PRACTICE_ID", "REP_NOTES", "RISK_INSIGHT"]],
-    on="PRACTICE_ID",
-    how="left",
+    on="PRACTICE_ID", how="left",
 )
 
 
 def recommended_action(row):
-    # The action depends on whether the rep already has a note suggesting why.
     insight = (row.get("RISK_INSIGHT") or "").upper()
     if "HIGH RISK" in insight:
         return "Schedule call this week — bring retention offer"
@@ -673,38 +747,49 @@ def recommended_action(row):
 
 
 queue["Recommended Action"] = queue.apply(recommended_action, axis=1)
-queue_display = pd.DataFrame({
-    "#": range(1, len(queue) + 1),
-    "Practice": queue["PRACTICE_NAME"],
-    "Territory": queue["TERRITORY"],
-    "Churn Risk": queue["CHURN_RISK"].apply(lambda v: f"{v*100:.0f}%"),
-    "At-Risk Revenue": queue["AT_RISK_REVENUE"].apply(lambda v: f"${v:,.0f}"),
-    "Days Since Last Order": queue["DAYS_SINCE_LAST_ORDER"].astype(int),
-    "Rep Note": queue["REP_NOTES"].fillna("—").str.slice(0, 80),
-    "Recommended Action": queue["Recommended Action"],
-})
 
-
-def style_queue(row):
-    # Color the whole row by the underlying RISK_LABEL of that practice.
-    pid = queue.iloc[row.name]["RISK_LABEL"]
-    color = RISK_COLORS.get(pid, BORDER)
-    return [f"background-color: {color}25; color: #FFFFFF;"] * len(row)
-
-
-st.dataframe(
-    queue_display.style.apply(style_queue, axis=1),
-    hide_index=True,
-    use_container_width=True,
-)
+action_html = ""
+for i, row in queue.iterrows():
+    rank = list(queue.index).index(i) + 1
+    risk_color = RISK_COLORS[row["RISK_LABEL"]]
+    days = int(row["DAYS_SINCE_LAST_ORDER"])
+    days_color = DANGER if days > 90 else (WARNING if days > 60 else TEXT_PRIMARY)
+    note_text = (row["REP_NOTES"] or "—")
+    note_text = (note_text[:90] + "…") if len(note_text) > 90 else note_text
+    action_html += f"""
+    <div class='action-row {row["RISK_LABEL"]}'>
+        <div class='action-rank' style='color:{risk_color};'>{rank}</div>
+        <div class='action-practice'>
+            {_html.escape(row['PRACTICE_NAME'])}
+            <span class='terr'>{_html.escape(row['TERRITORY'])} · {_html.escape(row['PRACTICE_TYPE'])}</span>
+        </div>
+        <div class='action-num'>
+            <span class='lbl'>Churn Risk</span>
+            <span style='color:{risk_color};'>{row['CHURN_RISK']*100:.0f}%</span>
+        </div>
+        <div class='action-num'>
+            <span class='lbl'>At-Risk $</span>
+            ${row['AT_RISK_REVENUE']:,.0f}
+        </div>
+        <div class='action-num'>
+            <span class='lbl'>Days Quiet</span>
+            <span style='color:{days_color};'>{days}d</span>
+        </div>
+        <div class='action-note'>
+            "{_html.escape(note_text)}"
+            <span class='rec'>→ {_html.escape(row['Recommended Action'])}</span>
+        </div>
+    </div>
+    """
+st.markdown(action_html, unsafe_allow_html=True)
 
 
 # =============================================================================
-# G) INTERACTIVE PRACTICE DEEP DIVE
+# PRACTICE DEEP DIVE
 # =============================================================================
 section_header(
     "Practice Deep Dive",
-    "Select any practice to see its full profile, order history, and rep-note timeline.",
+    "Select any practice to see its full profile, order history, and rep notes.",
 )
 sel_practice_id = st.selectbox(
     "Practice",
@@ -724,12 +809,8 @@ g3.markdown(
     unsafe_allow_html=True,
 )
 g4.markdown(
-    kpi_card(
-        "Total Revenue",
-        f"${prac['PRACTICE_REVENUE']:,.0f}",
-        f"{int(prac['DAYS_SINCE_LAST_ORDER'])}d since last order",
-        "brand",
-    ),
+    kpi_card("Total Revenue", f"${prac['PRACTICE_REVENUE']:,.0f}",
+             f"{int(prac['DAYS_SINCE_LAST_ORDER'])}d since last order", "brand"),
     unsafe_allow_html=True,
 )
 
@@ -737,14 +818,10 @@ dd1, dd2 = st.columns(2)
 with dd1:
     if not prac_orders.empty:
         fig = px.scatter(
-            prac_orders,
-            x="ORDER_DATE",
-            y="REVENUE",
-            size="QUANTITY",
-            color="PRODUCT",
-            title="Order timeline",
+            prac_orders, x="ORDER_DATE", y="REVENUE",
+            size="QUANTITY", color="PRODUCT", title="Order timeline",
         )
-        fig.update_layout(**PLOTLY_LAYOUT)
+        fig.update_layout(**PLOTLY_LAYOUT, legend=dict(bgcolor="rgba(0,0,0,0)", title=""))
         st.plotly_chart(fig, use_container_width=True)
     else:
         st.info("No orders on file for this practice.")
@@ -755,10 +832,10 @@ with dd2:
         for _, n in prac_notes.iterrows():
             sentiment_color = DANGER if n["SENTIMENT_SCORE"] < 0 else (WARNING if n["SENTIMENT_SCORE"] < 0.15 else SUCCESS)
             st.markdown(
-                f"""<div class='insight-card' style='border-left-color:{sentiment_color};'>
-                <div style='color:{TEXT_MUTED};font-size:0.78rem;'>{n['NOTE_DATE']} · sentiment {n['SENTIMENT_SCORE']:+.2f}</div>
-                <div style='margin-top:0.3rem;'>{n['REP_NOTES']}</div>
-                <div style='margin-top:0.3rem;color:{TEXT_MUTED};font-size:0.78rem;'>{n['RISK_INSIGHT']}</div>
+                f"""<div class='note-card' style='border-left-color:{sentiment_color};'>
+                <div class='note-meta'>{n['NOTE_DATE']} · sentiment {n['SENTIMENT_SCORE']:+.2f}</div>
+                <div class='note-body'>{_html.escape(n['REP_NOTES'])}</div>
+                <div class='note-tag'>{_html.escape(n['RISK_INSIGHT'])}</div>
                 </div>""",
                 unsafe_allow_html=True,
             )
@@ -767,13 +844,13 @@ with dd2:
 
 
 # =============================================================================
-# J) FOOTER — refresh + export
+# FOOTER
 # =============================================================================
 st.markdown("<div class='footer'>", unsafe_allow_html=True)
 foot1, foot2, foot3 = st.columns([1, 1, 2])
 
 with foot1:
-    if st.button("Refresh data from Snowflake"):
+    if st.button("🔄 Refresh data from Snowflake"):
         load_data.clear()
         st.rerun()
 
@@ -783,7 +860,7 @@ with foot2:
          "MONTHS_ACTIVE", "CHURN_RISK", "PRACTICE_REVENUE", "DAYS_SINCE_LAST_ORDER"]
     ].copy()
     st.download_button(
-        "Export HIGH-risk list (.csv)",
+        "⬇ Export HIGH-risk list (.csv)",
         data=export_df.to_csv(index=False).encode("utf-8"),
         file_name=f"revance_high_risk_{date.today().isoformat()}.csv",
         mime="text/csv",
