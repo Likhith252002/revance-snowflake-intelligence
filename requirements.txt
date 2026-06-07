@@ -1,0 +1,9 @@
+pandas>=2.0.0
+numpy>=1.24.0
+snowflake-connector-python>=3.6.0
+snowflake-snowpark-python>=1.11.0
+scikit-learn>=1.3.0
+textblob>=0.17.1
+streamlit>=1.30.0
+plotly>=5.18.0
+pyarrow>=14.0.0

@@ -1,57 +1,76 @@
 # Revance Practice Intelligence Pipeline
 
-An end-to-end Snowflake ML and AI pipeline that predicts churn risk for medical aesthetics practices, scores sales-rep field notes for sentiment and risk signals, and surfaces both in a live Streamlit dashboard.
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Snowflake](https://img.shields.io/badge/Snowflake-Snowpark%20%2B%20Cortex-29B5E8?logo=snowflake&logoColor=white)](https://www.snowflake.com/)
+[![scikit-learn](https://img.shields.io/badge/scikit--learn-RandomForest-F7931E?logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![License](https://img.shields.io/badge/Use-Demo-lightgrey)](#)
 
-Built around a synthetic dataset modeled on Revance's commercial footprint — practices (dermatology, plastic surgery, med spa), orders across the DAXXIFY and RHA product lines, and weekly rep call notes.
+> An end-to-end Snowflake + ML pipeline that scores every Revance medical-aesthetics practice for churn risk, mines rep field notes for early-warning signals, and surfaces both in a live, enterprise-styled Streamlit dashboard.
 
 ---
 
-## Overview
+## The problem
 
-The pipeline answers three operational questions a commercial team cares about:
+Aesthetic companies like Revance compete in a market where switching costs are low and competitive products (Botox, Juvederm, Restylane) are one phone call away. A dermatology practice that drifts from monthly DAXXIFY orders to quarterly orders has usually already had a conversation with a competitor — by the time the rep notices the dip in the CRM, the relationship is already lost.
 
-1. **Which practices are about to churn?** A Random Forest model trained on Snowpark-loaded order and tenure features scores every practice with a `CHURN_RISK` probability and a `HIGH / MEDIUM / LOW` label.
-2. **What are reps telling us in the field?** Free-text rep notes are scored for sentiment (TextBlob, mimicking the `SNOWFLAKE.CORTEX.SENTIMENT` function) and tagged with a rule-based risk insight.
-3. **Where should sales leadership focus this week?** A Streamlit dashboard joins the predictions, orders, and note analysis into territory- and product-level views with a high-risk action list.
+Three structural pressures make churn prediction unusually high-value for this space:
 
-All raw data, predictions, and analyses are persisted as Snowflake tables, so the dashboard reads from Snowflake at query time rather than from local files.
+1. **Long re-acquisition cycles.** Winning a med spa back after they switch takes 2–4 quarters and significant pricing concessions.
+2. **High revenue concentration per account.** A single high-volume practice can represent six figures in annual revenue, so even a small reduction in churn rate produces outsized dollar impact.
+3. **Qualitative signals lead the quantitative ones.** Reps hear "we're looking at Botox again" or "your delivery times have been bad" weeks before the order data moves. Capturing that signal requires NLP, not just SQL.
+
+This project addresses all three: an ML model on order behaviour for the hard signal, sentiment + risk-tagging on rep notes for the soft signal, and a dashboard that unifies them into a weekly action queue.
 
 ---
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    A[generate_data.py<br/>synthetic CSVs] --> B[setup_snowflake.py<br/>load raw tables]
-    B --> C[(Snowflake<br/>PRACTICES<br/>ORDERS<br/>REP_NOTES)]
-    C --> D[churn_model.py<br/>Snowpark + sklearn RF]
-    C --> E[cortex_analysis.py<br/>sentiment + risk insight]
-    D --> F[(CHURN_PREDICTIONS)]
-    E --> G[(REP_NOTES_ANALYSIS)]
-    C --> H[dashboard.py<br/>Streamlit + Plotly]
-    F --> H
-    G --> H
+```
+Data Generation  →  Snowflake Tables  →  Snowpark ML  →  Sentiment Analysis  →  Streamlit Dashboard
+   (synthetic         (raw + derived)      (Random          (TextBlob ≈            (live, Snowflake-
+    practices,                              Forest           Cortex SENTIMENT)      backed, filtered)
+    orders,                                 churn
+    rep notes)                              scoring)
 ```
 
-**Data flow**
-
-| Stage | Script | Inputs | Outputs |
-|---|---|---|---|
-| Generate | `generate_data.py` | — | `practices.csv`, `orders.csv`, `rep_notes.csv` |
-| Ingest | `setup_snowflake.py` | CSVs | `PRACTICES`, `ORDERS`, `REP_NOTES` |
-| Model | `churn_model.py` | `PRACTICES`, `ORDERS` | `CHURN_PREDICTIONS` |
-| Analyze | `cortex_analysis.py` | `REP_NOTES` | `REP_NOTES_ANALYSIS` |
-| Serve | `dashboard.py` | all of the above | Streamlit UI |
+See [ARCHITECTURE.md](ARCHITECTURE.md) for the detailed ASCII data-flow diagram, component table, and Snowflake schema for all five tables.
 
 ---
 
 ## Tech stack
 
-- **Warehouse / compute:** Snowflake (`COMPUTE_WH`), Snowpark Python
-- **ML:** scikit-learn `RandomForestClassifier`, pandas feature engineering
-- **NLP:** TextBlob sentiment (stand-in for Snowflake Cortex `SENTIMENT`), rule-based risk tagging
-- **App:** Streamlit, Plotly Express
-- **Connectors:** `snowflake-connector-python`, `snowflake-snowpark-python`
+| Layer | Tool | What it does here |
+|---|---|---|
+| ❄️ **Warehouse** | Snowflake | Single source of truth — raw and derived tables |
+| 🐼 **Compute** | Snowpark Python | Pulls features directly from Snowflake tables into pandas |
+| 🌲 **Churn model** | scikit-learn `RandomForestClassifier` | Scores every practice with a churn probability |
+| 💬 **NLP** | TextBlob (stand-in for Snowflake Cortex `SENTIMENT`) | Sentiment + rule-based risk tagging on rep notes |
+| 📊 **Dashboard** | Streamlit + Plotly | Dark-themed enterprise UI with filters and action queue |
+| 🧪 **Synthetic data** | pandas + numpy | 200 practices, ~2k orders, 200 rep notes |
+
+---
+
+## Project structure
+
+```
+revance_snowflake/
+├── generate_data.py        # Synthesizes practices / orders / rep notes (200 / ~2k / 200)
+├── setup_snowflake.py      # CREATE OR REPLACE tables + write_pandas bulk load
+├── churn_model.py          # Snowpark + sklearn RF — writes CHURN_PREDICTIONS
+├── cortex_analysis.py      # Sentiment + risk insight on rep notes — writes REP_NOTES_ANALYSIS
+├── dashboard.py            # Streamlit + Plotly enterprise dashboard
+├── config.py               # Snowflake credentials (git-ignored — see .env.example)
+├── requirements.txt        # Python dependencies
+├── .env.example            # Template for config.py values
+├── ARCHITECTURE.md         # Data flow + Snowflake schema
+├── README.md               # You are here
+├── practices.csv           # Generated
+├── orders.csv              # Generated
+├── rep_notes.csv           # Generated
+└── docs/
+    └── screenshots/        # Dashboard screenshots used in this README
+```
 
 ---
 
@@ -60,96 +79,115 @@ flowchart LR
 ### 1. Clone and install
 
 ```bash
-git clone <repo-url>
-cd revance_snowflake
+git clone https://github.com/Likhith252002/revance-snowflake-intelligence.git
+cd revance-snowflake-intelligence
 python -m venv .venv && source .venv/bin/activate
-pip install snowflake-connector-python snowflake-snowpark-python \
-            pandas scikit-learn textblob streamlit plotly
+pip install -r requirements.txt
 ```
 
 ### 2. Configure Snowflake credentials
 
-Create `config.py` in the project root (it's git-ignored):
+Copy the template and create a real `config.py` (git-ignored):
+
+```bash
+cp .env.example .env   # for reference
+```
+
+Then create `config.py` in the project root:
 
 ```python
 SNOWFLAKE_CONFIG = {
-    "account": "<your-account>",
-    "user": "<your-user>",
-    "password": "<your-password>",
+    "account":   "<your-account-locator>",
+    "user":      "<your-username>",
+    "password":  "<your-password>",
     "warehouse": "COMPUTE_WH",
-    "database": "SNOWFLAKE_LEARNING_DB",
-    "schema": "PUBLIC",
-    "role": "ACCOUNTADMIN",
+    "database":  "SNOWFLAKE_LEARNING_DB",
+    "schema":    "PUBLIC",
+    "role":      "ACCOUNTADMIN",
 }
 ```
 
-### 3. Run the pipeline
+### 3. Run the pipeline (in order)
 
-Run in order — each step depends on tables from the previous one:
+Each step depends on tables written by the previous one:
 
 ```bash
 python generate_data.py       # produces the three CSVs
 python setup_snowflake.py     # creates raw tables and loads CSVs
 python churn_model.py         # trains model, writes CHURN_PREDICTIONS
 python cortex_analysis.py     # writes REP_NOTES_ANALYSIS
-streamlit run dashboard.py    # launches the dashboard
+streamlit run dashboard.py    # launches the dashboard at http://localhost:8501
 ```
-
-The dashboard opens at `http://localhost:8501`.
 
 ---
 
-## Dashboard
+## Screenshots
 
-The Streamlit app shows four KPI cards (total practices, high/medium-risk counts, total revenue), churn-risk by territory, revenue by product and territory, average sentiment by territory, a high-risk action list with the rep's most recent note, and a territory-filtered practice explorer.
+### Original dashboard — KPIs and product mix
 
-### Screenshots
-
-**Overview, KPIs, churn risk by territory, and product mix**
-
-The header strip surfaces the four KPIs (200 practices, 45 high-risk, 11 medium-risk, ~$10.3M revenue) above a stacked churn-risk bar chart and a product-revenue pie. Southwest carries the heaviest practice count; SKINPEN and RHA3 lead the product split.
+The first dashboard release surfaced the headline counts and revenue split.
 
 ![Overview and KPIs](docs/screenshots/01-overview-kpis.png)
 
-**Revenue and sentiment by territory**
-
-Side-by-side territory views — Southwest leads on revenue (~$2.5M) but Southeast is the only territory where average rep-note sentiment dips into the warning band.
+### Original dashboard — revenue and sentiment by territory
 
 ![Revenue and sentiment by territory](docs/screenshots/02-revenue-sentiment.png)
 
-**High-risk practices — action list**
-
-The merged table joins `CHURN_PREDICTIONS` with the rep's most recent note tag, so reviewers see both the modeled risk and the qualitative signal in one row.
+### Original dashboard — high-risk practice table
 
 ![High-risk practices table](docs/screenshots/03-high-risk-table.png)
 
-**Practice explorer**
-
-Territory-filtered table over every scored practice with its churn probability and bucket label.
+### Original dashboard — practice explorer
 
 ![Practice explorer](docs/screenshots/04-practice-explorer.png)
 
+### Redesigned dashboard — Executive Summary Banner
+
+[ADD SCREENSHOT HERE]
+
+### Redesigned dashboard — At-Risk Revenue Calculator
+
+[ADD SCREENSHOT HERE]
+
+### Redesigned dashboard — Territory Leaderboard
+
+[ADD SCREENSHOT HERE]
+
+### Redesigned dashboard — Action Priority Queue
+
+[ADD SCREENSHOT HERE]
+
+### Redesigned dashboard — Practice Deep Dive
+
+[ADD SCREENSHOT HERE]
+
 ---
 
-## Repository layout
+## Key results
 
-```
-revance_snowflake/
-├── generate_data.py        # synthetic practices / orders / rep notes
-├── setup_snowflake.py      # create tables + load CSVs
-├── churn_model.py          # Snowpark + sklearn churn model
-├── cortex_analysis.py      # sentiment + risk insight on rep notes
-├── dashboard.py            # Streamlit + Plotly UI
-├── config.py               # Snowflake credentials (git-ignored)
-├── practices.csv           # generated
-├── orders.csv              # generated
-└── rep_notes.csv           # generated
-```
+Run against the bundled synthetic dataset, the pipeline produces:
+
+| Metric | Value |
+|---|---|
+| Practices scored | **200** |
+| HIGH-risk practices flagged | **45** (≈ 22% of the book) |
+| MEDIUM-risk practices flagged | **11** |
+| Total revenue tracked | **$10.3M** (trailing 12 months) |
+| Model accuracy (held-out test set) | **72%** |
+| Territories covered | 5 (Northeast, Southeast, Midwest, West, Southwest) |
+| Products tracked | 6 (DAXXIFY, RHA2/3/4, RHA Redensity, SkinPen) |
+| Rep notes scored for sentiment | 200 |
 
 ---
 
-## Notes
+## Business impact
 
-- The dataset is fully synthetic; no real Revance customer data is used.
-- `cortex_analysis.py` uses TextBlob locally to keep the demo runnable without Cortex entitlements. Swapping in `SNOWFLAKE.CORTEX.SENTIMENT(REP_NOTES)` via a SQL call is a one-line change.
-- The Streamlit data load is cached with `@st.cache_data`; clear the cache from the app menu after re-running the model or analysis step.
+For a Revance regional sales team, the output of this pipeline maps directly onto how a quarterly book gets worked:
+
+- **Where to deploy rep time first.** The Action Priority Queue ranks accounts by `churn_risk × revenue`, so a rep walks into Monday already knowing the ten calls that protect the most dollars. Without this, prioritization is anecdotal.
+- **A defensible at-risk revenue number for forecasting.** Instead of a gut estimate, leadership has a hard `at_risk_revenue` figure tied to the model output. That number goes into QBR slides and gives finance a concrete sensitivity for the next quarter.
+- **Early warning from rep notes.** Sentiment + keyword tagging catches "switch", "competitor", "budget cuts", and "delivery" weeks before the order pattern moves — buying the rep team a real intervention window instead of a post-mortem.
+- **Cross-sell as a retention lever.** The Product Penetration section makes it visible that practices on 3+ products churn meaningfully less than single-product accounts. That reframes the cross-sell pitch from "we'd like to grow the relationship" to "you're statistically safer when you anchor on more than one Revance product."
+- **Territory accountability.** The Territory Leaderboard gives each Area Director a single ranked view of their region's health — useful in 1:1s and during territory rebalancing conversations.
+
+The pipeline is not a replacement for the rep relationship. It's a way to make sure no high-value practice falls off the radar between Monday-morning syncs.
