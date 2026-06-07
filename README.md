@@ -123,43 +123,47 @@ streamlit run dashboard.py    # launches the dashboard at http://localhost:8501
 
 ## Screenshots
 
-### Original dashboard — KPIs and product mix
+### 1. Executive Summary — Portfolio Health Score and at-a-glance takeaways
 
-The first dashboard release surfaced the headline counts and revenue split.
+The first thing leadership sees: a single **Portfolio Health Score** (76/100 here), the dollars at risk, and three callout cards that name the most-urgent territory, the realistic save target this quarter, and any territories where rep-note sentiment has drifted into the warning band. The KPI strip below it covers total practices, the HIGH/MEDIUM risk counts, and total revenue.
 
-![Overview and KPIs](docs/screenshots/01-overview-kpis.png)
+![Executive summary banner and KPI strip](docs/screenshots/01-executive-summary.png)
 
-### Original dashboard — revenue and sentiment by territory
+### 2. At-Risk Revenue + Territory Leaderboard
 
-![Revenue and sentiment by territory](docs/screenshots/02-revenue-sentiment.png)
+Translates the model output into dollars: how much revenue is at risk from HIGH-risk practices ($2.22M), the upside if churn is halved ($1.11M), and the average revenue per HIGH-risk account ($50K). The Territory Leaderboard ranks all five regions by health score with solid dark cards — West takes the crown, Northeast trails at 67 — so an Area Director knows exactly where their region falls.
 
-### Original dashboard — high-risk practice table
+![At-risk revenue cards and territory leaderboard](docs/screenshots/02-at-risk-and-leaderboard.png)
 
-![High-risk practices table](docs/screenshots/03-high-risk-table.png)
+### 3. Product Penetration
 
-### Original dashboard — practice explorer
+The "stickiness" view. Single-product practices (8 here) churn dramatically more than practices on 3+ products (173, 47% lower churn risk). The stacked bar shows product adoption by territory, making it obvious where the cross-sell motion has room to run. This reframes the cross-sell pitch from "let's grow the relationship" to "you're statistically safer when you anchor on more than one Revance product."
 
-![Practice explorer](docs/screenshots/04-practice-explorer.png)
+![Product penetration and cross-sell insight](docs/screenshots/03-product-penetration.png)
 
-### Redesigned dashboard — Executive Summary Banner
+### 4. Rep Performance — sentiment and keyword signals
 
-[ADD SCREENSHOT HERE]
+Sentiment is the leading indicator — it moves weeks before order volume does. Bars are colored by band (green ≥ 0.15, amber 0–0.15, red < 0), so a regional dip jumps out instantly. The right-side chart surfaces the most-mentioned keywords from the rep notes ("referring", "no orders", "training", "competitor", "Botox"…), giving leadership a qualitative read without reading every note.
 
-### Redesigned dashboard — At-Risk Revenue Calculator
+![Rep performance — sentiment and keywords](docs/screenshots/04-rep-performance.png)
 
-[ADD SCREENSHOT HERE]
+### 5. Model Confidence
 
-### Redesigned dashboard — Territory Leaderboard
+Distribution of churn-risk scores across the portfolio (green=LOW, amber=MEDIUM, red=HIGH) plus the model's offline accuracy as a gauge (72% on the held-out test set). Helps a sales leader judge how much to trust the priority ranking and where the borderline cases sit.
 
-[ADD SCREENSHOT HERE]
+![Model confidence — histogram and accuracy gauge](docs/screenshots/05-model-confidence.png)
 
-### Redesigned dashboard — Action Priority Queue
+### 6. Action Priority Queue
 
-[ADD SCREENSHOT HERE]
+The operational heart of the dashboard. Each row is a practice the rep team should contact this week, ranked by `churn_risk × revenue`. Every row carries the rank, territory, practice type, churn risk percent, at-risk dollars, days since last order, the most recent rep note (in quotes), and a colored recommended-action CTA. A rep walks in Monday and works the list top-down.
 
-### Redesigned dashboard — Practice Deep Dive
+![Action priority queue with recommended actions](docs/screenshots/06-action-queue.png)
 
-[ADD SCREENSHOT HERE]
+### 7. Practice Deep Dive
+
+Pick any practice to see its full profile: territory, tenure, churn risk, total revenue, order timeline (sized by quantity, colored by product), and every rep note with a sentiment score. Useful for QBR prep, account reviews, and "why is this account flagged?" conversations.
+
+![Practice deep-dive profile](docs/screenshots/07-practice-deep-dive.png)
 
 ---
 
